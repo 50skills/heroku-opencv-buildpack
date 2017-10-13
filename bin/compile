@@ -70,7 +70,7 @@ export PATH="$HOME/usr/local/bin:$BUILD_DIR/.heroku/vendor/bin:/usr/local/sbin:/
 # SBL cache dir is persisted between builds so this allows us to avoid re-fetching
 mkdir -p $CACHE_DIR
 title "Generating environment"
-curl -s -L "https://s3-eu-west-1.amazonaws.com/50-skills-static/opencv.tar.gz" > $CACHE_DIR/env.tar.bz2
+curl -s -L "https://s3-eu-west-1.amazonaws.com/50-skills-static/opencv.tar.gz" > $CACHE_DIR/env.tar.gz
 subtitle "Unpacking..."
 tar -xzf $CACHE_DIR/env.tar.gz -C $BUILD_DIR
 
