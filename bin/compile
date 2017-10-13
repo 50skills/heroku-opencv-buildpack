@@ -69,8 +69,19 @@ export PATH="$BUILD_DIR/.heroku/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/s
 # Setup environment
 mkdir -p $CACHE_DIR
 title "Generating environment"
+if [ ! -f $CACHE_DIR/vendor.tar.bz2 ]; then
+	subtitle "Fetching..."
+	curl -s -L "https://s3.amazonaws.com/lobbdawg/file_for_heroku.tar.gz" > $CACHE_DIR/vendor.tar.bz2
+fi
 subtitle "Unpacking..."
-tar -xvf /app/vendor.tar.bz2 -C $BUILD_DIR
+tar -xvf $CACHE_DIR/vendor.tar.bz2 -C $BUILD_DIR
+
+
+# installing application dependencies
+if [ -f $BUILD_DIR/requirements.txt ]; then
+	title "Found requirements.txt, installing dependencies using pip"
+	$BUILD_DIR/.heroku/vendor/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --allow-all-external
+fi
 
 # creating env variables
 title "Creating environment variables."
@@ -81,6 +92,7 @@ export BLAS="\$HOME/.heroku/vendor/lib/libcblas.a"
 export LAPACK="\$HOME/.heroku/vendor/lib/liblapack.a"
 export LD_LIBRARY_PATH="\$HOME/.heroku/vendor/lib:\$LD_LIBRARY_PATH"
 export PATH="\$HOME/.heroku/vendor/bin:\$PATH"
+export PYTHONPATH="\$HOME/.heroku/vendor/lib/python2.7/site-packages/"
 EOF
 
 deep-mv $BUILD_DIR $ORIG_BUILD_DIR
