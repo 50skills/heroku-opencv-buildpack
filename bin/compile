@@ -70,7 +70,7 @@ export PATH="$BUILD_DIR/.heroku/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/s
 mkdir -p $CACHE_DIR
 title "Generating environment"
 subtitle "Unpacking..."
-tar -xvf /vendoring/vendor.tar.bz2 -C $BUILD_DIR
+tar -xvf /app/vendor.tar.bz2 -C $BUILD_DIR
 
 # creating env variables
 title "Creating environment variables."
