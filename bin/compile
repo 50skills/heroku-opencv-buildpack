@@ -69,10 +69,8 @@ export PATH="$BUILD_DIR/.heroku/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/s
 # Setup environment
 mkdir -p $CACHE_DIR
 title "Generating environment"
-if [ ! -f $CACHE_DIR/vendor.tar.bz2 ]; then
-	subtitle "Fetching..."
-	curl -s -L "https://s3-eu-west-1.amazonaws.com/50-skills-static/opencv.tar.gz" > $CACHE_DIR/vendor.tar.bz2
-fi
+subtitle "Fetching..."
+curl -s -L "https://s3-eu-west-1.amazonaws.com/50-skills-static/opencv.tar.gz" > $CACHE_DIR/vendor.tar.bz2
 subtitle "Unpacking..."
 tar -xvf $CACHE_DIR/vendor.tar.bz2 -C $BUILD_DIR
 
