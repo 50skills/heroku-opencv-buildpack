@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# SBL takes in BUILD_DIR CACHE_DIR ENV_DIR
+
 title() {
   echo "-----> $*"
 }
@@ -8,6 +10,8 @@ subtitle() {
   echo "       $*"
 }
 
+# Taken from python heroku buildpack
+###################################
 shopt -s extglob
 
 if [ $(uname) == Darwin ]; then
@@ -57,36 +61,44 @@ ORIG_BUILD_DIR=$BUILD_DIR
 BUILD_DIR=$APP_DIR
 cd $BUILD_DIR
 
-unset LD_LIBRARY_PATH PATH PYTHONPATH
-export LD_LIBRARY_PATH="$BUILD_DIR/.heroku/vendor/lib"
-export PATH="$BUILD_DIR/.heroku/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-export PYTHONPATH="$BUILD_DIR/.heroku/vendor/lib/python3.6"
+unset LD_LIBRARY_PATH PATH
+
+export LD_LIBRARY_PATH="$BUILD_DIR/.heroku/vendor/lib/"
+export PKG_CONFIG_PATH="$BUILD_DIR/.heroku/vendor/lib/pkgconfig:$PKG_CONFIG_PATH"
+export PATH="$HOME/usr/local/bin:$BUILD_DIR/.heroku/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
 
 # Setup environment
+# SBL cache dir is persisted between builds so this allows us to avoid re-fetching
 mkdir -p $CACHE_DIR
 title "Generating environment"
-if [ ! -f $CACHE_DIR/vendor.tar.xz ]; then
+if [ ! -f $CACHE_DIR/env.tar.gz ]; then
 	subtitle "Fetching..."
-	curl -s -L "http://chunk.io/f/f0ccfebbe4384004bbe2fffcf2c6e54c" > $CACHE_DIR/vendor.tar.xz
+    curl -s -L "https://s3-eu-west-1.amazonaws.com/jskrzypek/opencv3_plus_deps.tar.gz" > $CACHE_DIR/env.tar.gz
 fi
 subtitle "Unpacking..."
-tar -xvf $CACHE_DIR/vendor.tar.xz -C $BUILD_DIR
-
-# installing application dependencies
-if [ -f $BUILD_DIR/requirements.txt ]; then
-	title "Found requirements.txt, installing dependencies using pip"
-	$BUILD_DIR/.heroku/vendor/bin/pip3 install -r requirements.txt --exists-action=w --src=./.heroku/src --allow-all-external
-fi
+tar -xzf $CACHE_DIR/env.tar.gz -C $BUILD_DIR
 
 # creating env variables
 title "Creating environment variables."
 mkdir -p $BUILD_DIR/.profile.d
-cat <<EOF >$BUILD_DIR/.profile.d/heroku.sh
-export LD_LIBRARY_PATH="\$HOME/.heroku/vendor/lib:\$LD_LIBRARY_PATH"
-export PATH="\$HOME/.heroku/vendor/bin:\$PATH"
-export PYTHONPATH="\$HOME/.heroku/vendor/lib/python3.4"
+cat <<EOF >$BUILD_DIR/.profile.d/5251124.sh
+export ATLAS="\$HOME/.heroku/vendor/libatlas.a"
+export BLAS="\$HOME/.heroku/vendor/libblas.a"
+export LAPACK="\$HOME/.heroku/vendor/liblapack.a"
+export PKG_CONFIG_PATH="\$HOME/.heroku/vendor/lib/pkgconfig:\$PKG_CONFIG_PATH"
+export LD_LIBRARY_PATH="\$HOME/.heroku/vendor/lib:\$HOME/.heroku/vendor/lib/atlas-base:\$HOME/.heroku/vendor/lib/atlas-base/atlas:\$LD_LIBRARY_PATH"
+export PYTHONPATH="\$HOME/.heroku/vendor/lib/python3.4/dist-packages/:\$HOME/.heroku/vendor/lib/python3.4/dist-packages/"
+export PATH="\$HOME/usr/local/bin:\$HOME/.heroku/vendor/bin:\$PATH"
+ln -s \$HOME/.heroku/vendor/bin/opencv3 \$HOME/.heroku/vendor/bin/opencv
 EOF
+# export "\$LIBRARY_PATH=\$HOME/.heroku/vendor/lib/:\$LIBRARY_PATH"
+# export "\$LD_LIBRARY_PATH=\$HOME/.heroku/vendor/lib/:\$LD_LIBRARY_PATH"
+# export "\$PATH=\$HOME/.heroku/vendor/lib/:\$PATH"
+# above lines didn't do anything
 
 deep-mv $BUILD_DIR $ORIG_BUILD_DIR
+
+echo "$PKG_CONFIG_PATH"
+echo "${pkg-config --cflags "opencv >= 2.3.1"}"
 
 title "Buildpack installed."
