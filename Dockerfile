@@ -28,5 +28,3 @@ RUN pip install --user zbar-py imutils
 # Create vendor package
 WORKDIR /app/
 RUN tar cvfj /vendor.tar.bz2 .
-VOLUME /vendoring
-CMD cp /vendor.tar.bz2 /vendoring
