@@ -22,11 +22,8 @@ RUN python -m pip install --upgrade pip
 # Install Numpy and scipy
 RUN pip install --user numpy scipy
 
-# Install zbar-py,  imutils and PyPDF2
-RUN pip install --user zbar-py imutils PyPDF2
-
-# Install Matplotlib
-RUN pip install --user matplotlib
+# Install zbar-py,  imutils
+RUN pip install --user zbar-py imutils
 
 # Create vendor package
 WORKDIR /app/
