@@ -1,4 +1,4 @@
 #!/bin/bash
 
-echo "OpenCV"
+echo "Python + OpenCV"
 exit 0
