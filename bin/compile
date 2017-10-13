@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+apt-get install build-essential checkinstall cmake pkg-config yasm gfortran git
+apt-get install libjpeg8-dev libjasper-dev libpng12-dev
+apt-get install libtiff5-dev
+apt-get install libavcodec-dev libavformat-dev libswscale-dev libdc1394-22-dev
+apt-get install libxine2-dev libv4l-dev
+apt-get install libgstreamer0.10-dev libgstreamer-plugins-base0.10-dev
+apt-get install libqt4-dev libgtk2.0-dev libtbb-dev
+apt-get install libatlas-base-dev
+apt-get install libfaac-dev libmp3lame-dev libtheora-dev
+apt-get install libvorbis-dev libxvidcore-dev
+apt-get install libopencore-amrnb-dev libopencore-amrwb-dev
+apt-get install x264 v4l-utils
