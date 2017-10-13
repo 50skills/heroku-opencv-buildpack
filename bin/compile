@@ -78,7 +78,7 @@ tar -xvf $CACHE_DIR/vendor.tar.bz2 -C $BUILD_DIR
 # installing application dependencies
 if [ -f $BUILD_DIR/requirements.txt ]; then
 	title "Found requirements.txt, installing dependencies using pip"
-	$BUILD_DIR/.heroku/vendor/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --allow-all-external
+	$BUILD_DIR/.heroku/python/bin/pip install -r requirements.txt --exists-action=w --src=./.heroku/src --allow-all-external
 fi
 
 # creating env variables
@@ -89,8 +89,6 @@ export ATLAS="\$HOME/.heroku/vendor/lib/libatlas.a"
 export BLAS="\$HOME/.heroku/vendor/lib/libcblas.a"
 export LAPACK="\$HOME/.heroku/vendor/lib/liblapack.a"
 export LD_LIBRARY_PATH="\$HOME/.heroku/vendor/lib:\$LD_LIBRARY_PATH"
-export PATH="\$HOME/.heroku/vendor/bin:\$PATH"
-export PYTHONPATH="\$HOME/.heroku/vendor/lib/python2.7/site-packages/"
 EOF
 
 deep-mv $BUILD_DIR $ORIG_BUILD_DIR
