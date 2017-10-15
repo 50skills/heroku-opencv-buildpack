@@ -31,11 +31,10 @@ cmake -DBUILD_TIFF=ON \
   -DCMAKE_BUILD_TYPE=RELEASE \
   -DCMAKE_INSTALL_PREFIX=/app/.heroku/python \
   -DPYTHON_EXECUTABLE=/app/.heroku/python/bin/python3.6 \
-  -DPYTHON_INCLUDE_DIR=/app/.heroku/python/lib/python3.6/site-packages \
+  -DPYTHON_INCLUDE_DIR=/app/.heroku/python/include/python3.6m \
   -DPYTHON_PACKAGES_PATH=/app/.heroku/python/lib/python3.6/site-packages ..    
 
 make -j4
 make clean
 make
 make install
-title "Buildpack installed."
