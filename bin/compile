@@ -1,87 +1,41 @@
 #!/usr/bin/env bash
 
 # SBL takes in BUILD_DIR CACHE_DIR ENV_DIR
+# Install opencv
+cd $1
+curl https://s3.amazonaws.com/mergeguard/cmake.tar.gz -s -O
 
-title() {
-  echo "-----> $*"
-}
+# make dir
+mkdir -p /tmp/codon/vendor
 
-subtitle() {
-  echo "       $*"
-}
+# untar the binary to the directory we want
+tar -C /tmp/codon/vendor -xvf cmake.tar.gz
 
-# Taken from python heroku buildpack
-###################################
-shopt -s extglob
+wget -O opencv.zip https://github.com/opencv/opencv/archive/3.3.0.zip
+unzip opencv.zip
+cd opencv-3.3.0
+mkdir build
+cd build
+cmake -DBUILD_TIFF=ON \
+  -DBUILD_opencv_java=OFF \
+  -DWITH_CUDA=OFF \
+  -DENABLE_AVX=ON \
+  -DWITH_OPENGL=ON \
+  -DWITH_OPENCL=ON \
+  -DWITH_IPP=ON \
+  -DWITH_TBB=ON \
+  -DWITH_EIGEN=ON \
+  -DWITH_V4L=ON \
+  -DBUILD_TESTS=OFF \
+  -DBUILD_PERF_TESTS=OFF \
+  -DCMAKE_BUILD_TYPE=RELEASE \
+  -DCMAKE_INSTALL_PREFIX=/app/.heroku/python \
+  -DPYTHON_EXECUTABLE=/app/.heroku/python/bin/python3.6 \
+  -DPYTHON_INCLUDE_DIR=/app/.heroku/python/lib/python3.6/site-packages \
+  -DPYTHON_PACKAGES_PATH=/app/.heroku/python/lib/python3.6/site-packages ..    
 
-if [ $(uname) == Darwin ]; then
-    sed() { command sed -l "$@"; }
-else
-    sed() { command sed -u "$@"; }
-fi
-
-# Does some serious copying.
-deep-cp() {
-  declare source="$1" target="$2"
-
-  mkdir -p "$target"
-
-  # cp doesn't like being called without source params,
-  # so make sure they expand to something first.
-  # subshell to avoid surprising caller with shopts.
-  (
-    shopt -s nullglob dotglob
-    set -- "$source"/!(tmp|.|..)
-    [[ $# == 0 ]] || cp -a "$@" "$target"
-  )
-}
-
-# Does some serious moving.
-deep-mv() {
-  deep-cp "$1" "$2"
-  deep-rm "$1"
-}
-
-# Does some serious deleting.
-deep-rm() {
-  # subshell to avoid surprising caller with shopts.
-  (
-    shopt -s dotglob
-    rm -rf "$1"/!(tmp|.|..)
-  )
-}
-###################################
-
-BUILD_DIR=$1
-CACHE_DIR=$2
-
-APP_DIR="/app"
-deep-mv $BUILD_DIR $APP_DIR
-ORIG_BUILD_DIR=$BUILD_DIR
-BUILD_DIR=$APP_DIR
-cd $BUILD_DIR
-
-unset LD_LIBRARY_PATH PATH
-
-export LD_LIBRARY_PATH="$BUILD_DIR/.heroku/vendor/lib/"
-export PATH="$HOME/usr/local/bin:$BUILD_DIR/.heroku/vendor/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin"
-
-# Setup environment
-# SBL cache dir is persisted between builds so this allows us to avoid re-fetching
-mkdir -p $CACHE_DIR
-title "Generating environment"
-curl -s -L "https://s3-eu-west-1.amazonaws.com/50-skills-static/opencv.tar.gz" > $CACHE_DIR/env.tar.gz
-subtitle "Unpacking..."
-tar -xzf $CACHE_DIR/env.tar.gz -C $BUILD_DIR
-
-# creating env variables
-# TODO remove the below PATH if python is still having issues
-title "Creating environment variables."
-mkdir -p $BUILD_DIR/.profile.d
-cat <<EOF >$BUILD_DIR/.profile.d/5251124.sh
-export LD_LIBRARY_PATH="\$HOME/.heroku/vendor/lib/:\$HOME/.heroku/vendor/lib/:\$LD_LIBRARY_PATH"
-export PATH="\$HOME/usr/local/bin:\$HOME/.heroku/vendor/bin:\$PATH"
-
-deep-mv $BUILD_DIR $ORIG_BUILD_DIR
-
+make -j4
+make clean
+make
+make install
 title "Buildpack installed."
